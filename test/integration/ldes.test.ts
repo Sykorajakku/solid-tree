@@ -3,10 +3,9 @@ import { describe, beforeAll, afterAll, it, expect, test } from '@jest/globals';
 import { DataFactory, Writer, Parser, Quad, Store, StreamParser } from 'n3'; 
 import { initialize, insertMember } from '../../src/init/Initializer';
 import { CommunitySolidServerRunner } from './config/CommunitySolidServerRunner';
-import solidServer from 'solid-server';
 import { NodeSolidServerRunner } from './config/NodeSolidServerRunner';
 import { SolidServerRunner } from './config/SolidServerRunner';
-import rimraf from 'rimraf';
+
 import TREE from '../../src/vocabularies/tree';
 const { quad, namedNode, literal } = DataFactory;
 

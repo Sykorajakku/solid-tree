@@ -16,9 +16,9 @@ export const initialize = async (base: string, ldesRootRelativePath: string): Pr
     // get metadata from describedBy
     
     // create root container
-    await fetch(base + ldesRootRelativePath, { method: 'PUT', headers: { 'Content-Type': 'text/turtle' }});
     const membersContainer = base + ldesRootRelativePath + v4() + "/";
-    let response = await fetch(membersContainer, { method: 'PUT', headers: { 'Content-type': 'text/turtle' }});
+    await fetch(base + ldesRootRelativePath, { method: 'PUT', headers: { 'Content-Type': 'text/turtle' }});
+    await fetch(membersContainer, { method: 'PUT', headers: { 'Content-type': 'text/turtle' }});
     
     // TODO: fetch metadata file location using HEAD
     

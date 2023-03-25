@@ -1,0 +1,1 @@
+{"redirect_uris":["https://localhost:8443/"],"client_id":"f2cee4deffb594eec5bbfbbf3eec223e","client_secret":"07b453ed04c53adde41e04c9987e4ec8","response_types":["code"],"grant_types":["authorization_code","refresh_token"],"application_type":"web","subject_type":"public","id_token_signed_response_alg":"RS256","token_endpoint_auth_method":"client_secret_basic"}
