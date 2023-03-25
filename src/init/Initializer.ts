@@ -19,7 +19,6 @@ export const initialize = async (base: string, ldesRootRelativePath: string): Pr
     await fetch(base + ldesRootRelativePath, { method: 'PUT', headers: { 'Content-Type': 'text/turtle' }});
     const membersContainer = base + ldesRootRelativePath + v4() + "/";
     let response = await fetch(membersContainer, { method: 'PUT', headers: { 'Content-type': 'text/turtle' }});
-    let containerLocation = response.headers.get('location');
     
     // TODO: fetch metadata file location using HEAD
     
@@ -37,7 +36,7 @@ export const initialize = async (base: string, ldesRootRelativePath: string): Pr
         quad(
             namedNode(rootContainerPath),
             namedNode(TREE.view),
-            namedNode(containerLocation!)
+            namedNode(membersContainer)
         )
     ]);
 

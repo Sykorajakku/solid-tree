@@ -11,14 +11,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "install": "^0.13.0",
+    "inversify": "^6.0.1",
     "n3": "^1.16.3",
-    "solid-server": "^5.7.7",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^4.4.1",
+    "solid-node-client": "^2.1.10",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
     "@solid/community-server": "^5.1.0",
     "cross-fetch": "^3.1.5",
+    "solid-server": "^5.7.7",
     "ts-jest": "^29.0.5",
     "typescript": "^4.7.2"
   }
