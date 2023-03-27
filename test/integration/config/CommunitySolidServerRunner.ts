@@ -4,7 +4,7 @@ import { SolidServerRunner } from "./SolidServerRunner";
 export class CommunitySolidServerRunner implements SolidServerRunner {
     private app: App;
 
-    public readonly baseUri = 'http://localhost:3000/';
+    public readonly baseUri = 'http://localhost:3000';
 
     public start = async () => {
         const appRunner = new AppRunner();

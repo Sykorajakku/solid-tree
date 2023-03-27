@@ -7,7 +7,7 @@ import { SolidServerRunner } from "./SolidServerRunner";
 export class NodeSolidServerRunner implements SolidServerRunner {
     private app: any;
 
-    public readonly baseUri = 'http://localhost:8443/public/';
+    public readonly baseUri = 'http://localhost:8443/public';
 
     public start = async () => {
         const server = solidServer.createServer({
