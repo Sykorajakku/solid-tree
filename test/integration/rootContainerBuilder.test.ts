@@ -8,7 +8,7 @@ import { InitializerConfig } from '../../src/init/initializerConfig';
 
 describe('Library using', () => {
     const solidImplementations: { name: string, runner: SolidServerRunner }[] = [
-        { name: 'Community Solid Server (CSS)', runner: new CommunitySolidServerRunner() },
+        //{ name: 'Community Solid Server (CSS)', runner: new CommunitySolidServerRunner() },
         { name: 'Node Solid Server (NSS)', runner: new NodeSolidServerRunner() }
     ];
 

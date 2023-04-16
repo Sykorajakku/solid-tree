@@ -5,9 +5,7 @@ import type { LibRuntime } from "./libRuntime"
 import { Quad, DataFactory } from "n3"
 import { LibData } from "./libData"
 import LDES from "../vocabularies/ldes"
-import SOLIDSTREAMS from "../vocabularies/solidstreams"
 import { getCurrentDateInXsdDateTimeFormat } from "../util/time"
-import XSD from "../vocabularies/xsd"
 
 const { quad, namedNode } = DataFactory;
 
@@ -49,15 +47,11 @@ export class Lib {
         }
 
         const insertionTime = getCurrentDateInXsdDateTimeFormat()
-
-        memberQuads.push(
-            quad(
-                namedNode(memberRoot.toString()),
-                namedNode(SOLIDSTREAMS.publishTimestamp),
-                DataFactory.literal(insertionTime, namedNode(XSD.dateTime))
-            )
-        )
+        memberQuads = this.libData.addTimepathProperty(memberQuads, memberRoot, insertionTime)
+        const location = await this.solidProtocolUtils.postResource(newMemberContainer, memberQuads)
         
-        await this.solidProtocolUtils.postResource(newMemberContainer, memberQuads)
+        const leafRelationWriter = await this.libData.createLeafRelation(newMemberContainer, location, insertionTime)
+        const newMemberContainerMetadata = await this.solidProtocolUtils.findContainerDescriptionResource(newMemberContainer)
+        await this.solidProtocolUtils.insertWriterWithN3Update(newMemberContainerMetadata, leafRelationWriter)
     }
 }

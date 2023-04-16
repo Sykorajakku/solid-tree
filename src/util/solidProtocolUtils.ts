@@ -50,7 +50,7 @@ export class SolidProtocolUtils {
 
         let location = response.headers.get('Location')
         if (this.linkIsRelative(location)) {
-            location = containerUrl.toString() + location
+            location = containerUrl.origin.toString() + location
         }
         return new URL(location)
     }
@@ -96,11 +96,14 @@ export class SolidProtocolUtils {
         return new URL(describedByLink)
     }
 
-    public insertTriplesWithN3Update = async (resource: URL, insertedQuads: Quad[]) => {
+    public insertQuadsWithN3Update = async (resource: URL, insertedQuads: Quad[]) => {
         const writer = new Writer()
-        let text = null
-        
         writer.addQuads(insertedQuads)
+        await this.insertWriterWithN3Update(resource, writer)
+    }
+
+    public insertWriterWithN3Update = async (resource: URL, writer: Writer) => {
+        let text = null
         writer.end((err, result) => {
             if (err) {
                 throw new Error(`Unable to create n3 update body: ${err}`)
@@ -124,6 +127,13 @@ export class SolidProtocolUtils {
         if (!result.ok) {
             throw new Error(`Unable to proceed with n3 update at ${resource}: ${result.statusText}`)
         }
+    }
+
+    public removeTrailingSlash = (url: string): string => url.replace(/\/$/, '')
+
+    public extractResourceName = (url: string): string => {
+        const parts = url.split('/');
+        return parts[parts.length - 1];
     }
 
     private parseDescribedByLink = (linkHeader: string): string | null => {

@@ -57,11 +57,11 @@ export class LibSolidRuntime {
 
         const rootContainerQuads = this.createRootContainerTriples(collectionsMembersContainerUrl)
         const rootContainerMeta = await solidProtocolUtils.findContainerDescriptionResource(this.rootContainerUrl)
-        await solidProtocolUtils.insertTriplesWithN3Update(rootContainerMeta, rootContainerQuads)
+        await solidProtocolUtils.insertQuadsWithN3Update(rootContainerMeta, rootContainerQuads)
         
         const membersContainerQuads = this.createMembersContainerTriples(collectionsMembersContainerUrl)
         const membersContainerMeta = await solidProtocolUtils.findContainerDescriptionResource(collectionsMembersContainerUrl)
-        await solidProtocolUtils.insertTriplesWithN3Update(membersContainerMeta, membersContainerQuads)
+        await solidProtocolUtils.insertQuadsWithN3Update(membersContainerMeta, membersContainerQuads)
     }
 
     private createRootContainerTriples = (membersCollectionContainerUrl: URL): Quad[] => [

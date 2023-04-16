@@ -9,6 +9,7 @@ export default class TREE {
     public static value = this.base + 'value';
     public static path = this.base + 'path';
     public static member = this.base + 'member';
+    public static remainingItems = this.base + 'remainingItems';
     public static LessThanOrEqualToRelation = this.base + 'LessThanOrEqualToRelation';
     public static LessThanRelation = this.base + 'LessThanRelation';
     public static EqualToRelation = this.base + 'EqualToRelation';

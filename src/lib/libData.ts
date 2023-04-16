@@ -1,14 +1,16 @@
 import { Types } from "./../util/inversify/types"
 import { inject, injectable } from "inversify"
-import { DataFactory } from "n3"
+import { DataFactory, Quad, Writer } from "n3"
 import { SolidProtocolUtils } from "../util/solidProtocolUtils"
 import { Node } from "../data/node"
 import TREE from "../vocabularies/tree"
 import type { LibRuntime } from "../lib/libRuntime"
 import { RDF } from "@solid/community-server"
 import LDES from "../vocabularies/ldes"
+import SOLIDSTREAMS from "../vocabularies/solidstreams"
+import XSD from "../vocabularies/xsd"
 
-const { namedNode } = DataFactory;
+const { quad, namedNode, blankNode } = DataFactory;
 
 @injectable()
 export class LibData {
@@ -51,6 +53,60 @@ export class LibData {
         }
 
         return views
+    }
+
+    public createLeafRelation = async (containerUrl: URL, memberUrl: URL, generatedAtTime: string): Promise<Writer> => {
+        const writer = new Writer()
+        const containerResource = this.solidProtocolUtils.removeTrailingSlash(containerUrl.toString())
+        const resourceName = this.solidProtocolUtils.extractResourceName(memberUrl.toString())
+        const relationUrl = `${containerResource}#${resourceName}`
+
+        // N3 updates does not allow to use blank nodes (stated in SOLID specification)
+        writer.addQuads([
+            quad(
+                namedNode(containerUrl.toString()),
+                namedNode(TREE.relation),
+                namedNode(relationUrl)
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(RDF.type),
+                namedNode(TREE.EqualToRelation)
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.path),
+                namedNode(SOLIDSTREAMS.publishTimestamp)
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.value),
+                DataFactory.literal(generatedAtTime, namedNode(XSD.dateTime))
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.remainingItems),
+                DataFactory.literal(1, namedNode(XSD.integer))
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.node),
+                namedNode(memberUrl.toString())
+            )
+        ])
+
+        return writer
+    }
+
+    public addTimepathProperty = (memberQuads: Quad[], memberRoot: URL, generatedAtTime: string): Quad[] => {
+        memberQuads.push(
+            quad(
+                namedNode(memberRoot.toString()),
+                namedNode(SOLIDSTREAMS.publishTimestamp),
+                DataFactory.literal(generatedAtTime, namedNode(XSD.dateTime))
+            )
+        )
+        return memberQuads   
     }
 
     public countLeafRelationNodes = async (containerUrl: URL): Promise<number> => {
