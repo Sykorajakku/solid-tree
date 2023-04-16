@@ -7,8 +7,6 @@ import { LibData } from "./libData"
 import LDES from "../vocabularies/ldes"
 import { getCurrentDateInXsdDateTimeFormat } from "../util/time"
 
-const { quad, namedNode } = DataFactory;
-
 @injectable()
 export class Lib {
 
@@ -38,20 +36,19 @@ export class Lib {
              ` no view description of ${LDES.eventSource}}`)
         }
 
+        const insertionTime = getCurrentDateInXsdDateTimeFormat()
         const membersCount = await this.libData.countLeafRelationNodes(ldesEventSource.nodeContainerUrl)
         let newMemberContainer = ldesEventSource.nodeContainerUrl
 
-        if (membersCount > 10) {
-            // TODO: newMemberContainer update, implementing paging
-            throw new Error('TODO: Implement paging. More members currently unsupported!')
+        if (membersCount > 10) { // TODO: read paging configuration
+            newMemberContainer = await this.libData.createNewMembersContainer(newMemberContainer, insertionTime)            
         }
 
-        const insertionTime = getCurrentDateInXsdDateTimeFormat()
         memberQuads = this.libData.addTimepathProperty(memberQuads, memberRoot, insertionTime)
         const location = await this.solidProtocolUtils.postResource(newMemberContainer, memberQuads)
         
-        const leafRelationWriter = await this.libData.createLeafRelation(newMemberContainer, location, insertionTime)
+        const leafRelationQuads = await this.libData.createLeafRelation(newMemberContainer, location, insertionTime)
         const newMemberContainerMetadata = await this.solidProtocolUtils.findContainerDescriptionResource(newMemberContainer)
-        await this.solidProtocolUtils.insertWriterWithN3Update(newMemberContainerMetadata, leafRelationWriter)
+        await this.solidProtocolUtils.insertQuadsWithN3Update(newMemberContainerMetadata, leafRelationQuads)
     }
 }

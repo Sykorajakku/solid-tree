@@ -2,6 +2,7 @@ import { Types } from "./inversify/types"
 import { inject, injectable } from "inversify"
 import type { LibRuntime } from "../lib/libRuntime"
 import { Parser, Quad, Writer } from "n3"
+import { writeQuadsToTurtle } from "./rdf"
 
 @injectable()
 export class SolidProtocolUtils {
@@ -97,19 +98,31 @@ export class SolidProtocolUtils {
     }
 
     public insertQuadsWithN3Update = async (resource: URL, insertedQuads: Quad[]) => {
-        const writer = new Writer()
-        writer.addQuads(insertedQuads)
-        await this.insertWriterWithN3Update(resource, writer)
+        await this.insertWriterWithN3Update(resource, writeQuadsToTurtle(insertedQuads))
     }
 
-    public insertWriterWithN3Update = async (resource: URL, writer: Writer) => {
-        let text = null
-        writer.end((err, result) => {
-            if (err) {
-                throw new Error(`Unable to create n3 update body: ${err}`)
+    public insertWriterWithN3Update = async (resource: URL, insertTurtle: string) => {
+        const result = await this.libRuntime.authenticatedFetch.fetch(
+            resource.toString(),
+            { 
+                method: 'PATCH',
+                headers: { 'Content-Type': 'text/n3' },
+                body: `
+                    @prefix solid: <http://www.w3.org/ns/solid/terms#> .
+                    _:rename a solid:InsertDeletePatch;
+                    solid:inserts { ${insertTurtle} } .
+                `
             }
-            text = result
-        })
+        )
+
+        if (!result.ok) {
+            throw new Error(`Unable to proceed with n3 update at ${resource}: ${result.statusText}`)
+        }
+    }
+
+    public deleteInsertWithN3Update = async (resource: URL, insertedQuads: Quad[], deletedQuads: Quad[]) => {
+        const insertTurtle = writeQuadsToTurtle(insertedQuads)
+        const deleteTurtle = writeQuadsToTurtle(deletedQuads)
 
         const result = await this.libRuntime.authenticatedFetch.fetch(
             resource.toString(),
@@ -119,7 +132,8 @@ export class SolidProtocolUtils {
                 body: `
                     @prefix solid: <http://www.w3.org/ns/solid/terms#> .
                     _:rename a solid:InsertDeletePatch;
-                    solid:inserts { ${text} } .
+                    solid:inserts { ${insertTurtle} };
+                    solid:deletes { ${deleteTurtle} }.
                 `
             }
         )

@@ -36,9 +36,9 @@ describe('Library using', () => {
                     .withInitializerConfig(emptyInitializerConfig)
                     .build()
             
-
-
-                await lib.insertCollectionMember([], new URL('http://localhost:3000/'))
+                for (let i = 0; i < 12; ++i) {
+                    await lib.insertCollectionMember([], new URL('http://localhost:3000/'))
+                }
             })
         })
     })

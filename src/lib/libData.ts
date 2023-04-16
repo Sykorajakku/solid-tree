@@ -9,8 +9,9 @@ import { RDF } from "@solid/community-server"
 import LDES from "../vocabularies/ldes"
 import SOLIDSTREAMS from "../vocabularies/solidstreams"
 import XSD from "../vocabularies/xsd"
+import { createRandomChildContainerUrl } from "../util/url"
 
-const { quad, namedNode, blankNode } = DataFactory;
+const { quad, namedNode } = DataFactory;
 
 @injectable()
 export class LibData {
@@ -55,14 +56,13 @@ export class LibData {
         return views
     }
 
-    public createLeafRelation = async (containerUrl: URL, memberUrl: URL, generatedAtTime: string): Promise<Writer> => {
-        const writer = new Writer()
+    public createLeafRelation = (containerUrl: URL, memberUrl: URL, generatedAtTime: string): Quad[] => {
         const containerResource = this.solidProtocolUtils.removeTrailingSlash(containerUrl.toString())
         const resourceName = this.solidProtocolUtils.extractResourceName(memberUrl.toString())
         const relationUrl = `${containerResource}#${resourceName}`
 
         // N3 updates does not allow to use blank nodes (stated in SOLID specification)
-        writer.addQuads([
+        return [
             quad(
                 namedNode(containerUrl.toString()),
                 namedNode(TREE.relation),
@@ -93,9 +93,7 @@ export class LibData {
                 namedNode(TREE.node),
                 namedNode(memberUrl.toString())
             )
-        ])
-
-        return writer
+        ]
     }
 
     public addTimepathProperty = (memberQuads: Quad[], memberRoot: URL, generatedAtTime: string): Quad[] => {
@@ -113,5 +111,74 @@ export class LibData {
         const quads = await this.solidProtocolUtils.getContainerQuads(containerUrl)
         const equalToRelationQuads = quads.filter(quad => quad.object.equals(namedNode(TREE.EqualToRelation)))
         return equalToRelationQuads.length
+    }
+
+    public createNewMembersContainer = async (containerUrl: URL, generatedAtTime: string): Promise<URL> => {
+        const newContainerUrl = createRandomChildContainerUrl(this.libRuntime.rootContainerUrl)
+        const rootContainerMetadataUrl = await this.solidProtocolUtils.findContainerDescriptionResource(this.libRuntime.rootContainerUrl)
+        await this.solidProtocolUtils.createContainer(newContainerUrl)
+        
+        await this.solidProtocolUtils.deleteInsertWithN3Update(
+            rootContainerMetadataUrl,
+            [ quad(namedNode(this.libRuntime.rootContainerUrl.toString()), namedNode(TREE.view), namedNode(newContainerUrl.toString())) ],
+            [ quad(namedNode(this.libRuntime.rootContainerUrl.toString()), namedNode(TREE.view), namedNode(containerUrl.toString())) ],
+        )
+
+        // TODO: add tree:remaningItems to inserted quads
+        const insertQuads = this.createNewMembersContainerMetadata(newContainerUrl, containerUrl, generatedAtTime)
+        const newContainerUrlMetadataUrl = await this.solidProtocolUtils.findContainerDescriptionResource(newContainerUrl) 
+        await this.solidProtocolUtils.insertQuadsWithN3Update(newContainerUrlMetadataUrl, insertQuads)
+
+        return containerUrl
+    }
+
+    private createNewMembersContainerMetadata = (newContainerUrl: URL, oldContainerURL: URL, generatedAtTime: string): Quad[] => {
+        const newContainerBase = this.solidProtocolUtils.removeTrailingSlash(newContainerUrl.toString())
+        const oldContainerResourceIds = this.solidProtocolUtils.extractResourceName(oldContainerURL.toString())  
+        const relationUrl = `${newContainerBase}#${oldContainerResourceIds}`
+
+        // N3 updates does not support blank nodes
+        return [
+            quad(
+                namedNode(newContainerUrl.toString()),
+                namedNode(RDF.type),
+                namedNode(TREE.Node)
+            ),
+            quad(
+                namedNode(newContainerUrl.toString()),
+                namedNode(TREE.viewDescription),
+                namedNode(newContainerUrl.toString() + 'viewDescription')
+            ),
+            quad(
+                namedNode(newContainerUrl.toString() + 'viewDescription'),
+                namedNode(RDF.type),
+                namedNode(LDES.eventSource)
+            ),
+            quad(
+                namedNode(newContainerUrl.toString()),
+                namedNode(TREE.relation),
+                namedNode(relationUrl)    
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(RDF.type),
+                namedNode(TREE.LessThanRelation)
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.node),
+                namedNode(oldContainerURL.toString())
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.path),
+                namedNode(SOLIDSTREAMS.publishTimestamp)
+            ),
+            quad(
+                namedNode(relationUrl),
+                namedNode(TREE.value),
+                DataFactory.literal(generatedAtTime, namedNode(XSD.dateTime))
+            ),
+        ]
     }
 }
