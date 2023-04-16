@@ -2,7 +2,7 @@ import { App, AppRunner } from "@solid/community-server";
 import { SolidServerRunner } from "./SolidServerRunner";
 
 export class CommunitySolidServerRunner implements SolidServerRunner {
-    private app: App;
+    private app: App | null = null;
 
     public readonly baseUri = 'http://localhost:3000';
 
@@ -13,6 +13,6 @@ export class CommunitySolidServerRunner implements SolidServerRunner {
     };
 
     public stop = async () => {
-        await this.app.stop();
+        await this.app!.stop();
     };
 }

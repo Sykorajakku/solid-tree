@@ -2,15 +2,17 @@
     "compilerOptions": {
         "lib": ["ES2015", "dom"],
         "types": ["reflect-metadata"],
+        "allowJs": true,
         "module": "es6",
         "target": "ES2015",
-        "allowJs": true,
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "strict": false,
+        "outDir": "./dist"
     }
 }
