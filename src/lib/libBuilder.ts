@@ -9,6 +9,7 @@ import { SolidProtocolUtils } from "../util/solidProtocolUtils"
 import { LibData } from "./libData"
 import { ShaclPathExtractor } from "../shacl/interfaces/shaclPathExtractor"
 import { RdfjsShaclPathExtractor } from "../shacl/rdfjsShaclPathExtractor"
+import { LibBtree } from "./libBtree"
 
 export type AuthenticatedFetch = { fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> }
 
@@ -58,6 +59,7 @@ export class LibBuilder {
                 container.bind<LibData>(Types.LibData).to(LibData)
                 container.bind<SolidProtocolUtils>(Types.SolidProtocolUtils).to(SolidProtocolUtils)
                 container.bind<ShaclPathExtractor>(Types.ShaclPathExtractor).to(RdfjsShaclPathExtractor)
+                container.bind<LibBtree>(Types.LibBtree).to(LibBtree)
                 container.bind<Lib>(Types.Lib).to(Lib)
                 return container.get<Lib>(Types.Lib)
             }

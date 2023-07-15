@@ -24,6 +24,14 @@ export class SolidProtocolUtils {
         }
     }
 
+    public containerExist = async (containerUrl: URL) => {
+        const response = await this.libRuntime.authenticatedFetch.fetch(
+            containerUrl.toString(),
+            { method: 'GET', headers: { 'Content-Type': 'text/turtle' } }
+        )
+        return response.ok
+    }
+
     public postResource = async (containerUrl: URL, quads: Quad[]): Promise<URL> => {
         const writer = new Writer()
         writer.addQuads(quads)
@@ -132,7 +140,28 @@ export class SolidProtocolUtils {
                 body: `
                     @prefix solid: <http://www.w3.org/ns/solid/terms#> .
                     _:rename a solid:InsertDeletePatch;
-                    solid:inserts { ${insertTurtle} };
+                    solid:inserts { ${insertTurtle} }; 
+                    solid:deletes { ${deleteTurtle} }.
+                `
+            }
+        )
+
+        if (!result.ok) {
+            throw new Error(`Unable to proceed with n3 update at ${resource}: ${result.statusText}`)
+        }
+    }
+
+    public deleteWithN3Update = async (resource: URL, deletedQuads: Quad[]) => {
+        const deleteTurtle = writeQuadsToTurtle(deletedQuads)
+
+        const result = await this.libRuntime.authenticatedFetch.fetch(
+            resource.toString(),
+            { 
+                method: 'PATCH',
+                headers: { 'Content-Type': 'text/n3' },
+                body: `
+                    @prefix solid: <http://www.w3.org/ns/solid/terms#> .
+                    _:rename a solid:InsertDeletePatch;
                     solid:deletes { ${deleteTurtle} }.
                 `
             }
@@ -148,6 +177,12 @@ export class SolidProtocolUtils {
     public extractResourceName = (url: string): string => {
         const parts = url.split('/');
         return parts[parts.length - 1];
+    }
+
+    public combineFragmentUrl = (root: URL, member: URL): string => {
+        const containerResource = this.removeTrailingSlash(root.toString())
+        const resourceName = this.extractResourceName(this.removeTrailingSlash(member.toString()))
+        return `${containerResource}#${resourceName}`
     }
 
     private parseDescribedByLink = (linkHeader: string): string | null => {

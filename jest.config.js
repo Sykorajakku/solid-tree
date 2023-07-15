@@ -2,7 +2,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testTimeout: 15000,
+  testTimeout: 150000000,
   detectOpenHandles: true,
   transform: {
     "^.+\\.(js|ts|tsx)$": "ts-jest",

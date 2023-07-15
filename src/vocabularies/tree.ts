@@ -12,5 +12,6 @@ export default class TREE {
     public static remainingItems = this.base + 'remainingItems';
     public static LessThanOrEqualToRelation = this.base + 'LessThanOrEqualToRelation';
     public static LessThanRelation = this.base + 'LessThanRelation';
+    public static GreaterThanOrEqualToRelation = this.base + 'GreaterThanOrEqualToRelation';
     public static EqualToRelation = this.base + 'EqualToRelation';
 }

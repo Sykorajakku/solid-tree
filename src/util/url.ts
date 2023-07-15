@@ -14,5 +14,5 @@ export const parseSolidContainerUrl = (containerUrl: string): URL => {
 }
 
 export const createRandomChildContainerUrl = (containerUrl: URL): URL => {
-    return new URL(containerUrl.toString() + v4() + '/')
+    return new URL(containerUrl.toString() + v4().substring(0, 6) + '/')
 }

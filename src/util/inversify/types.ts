@@ -4,5 +4,6 @@ export const Types = {
     Lib: Symbol.for('Lib'),
     LibRuntime: Symbol.for('LibRuntime'),
     LibData: Symbol.for('LibData'),
+    LibBtree: Symbol.for('LibBtree'),
     SolidProtocolUtils: Symbol.for('SolidProtocolUtils')
 }
